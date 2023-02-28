@@ -2,7 +2,9 @@ import logging
 from telegram import Update
 from telegram.ext import filters, ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler
 import datetime
+import openai
 
+openai.api_key = "api_key"
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
@@ -36,6 +38,12 @@ async def unknown(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def phone_number(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Please call +6564385122 to speak to our friendly officers for further enquires. \n Alternatively, you could visit https://www.mom.gov.sg/passes-and-permits/work-permit-for-foreign-domestic-worker/foreign-domestic-worker-levy/paying-levy for more information about the levy payment process.")
 
+async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    message = update.message.text
+    model_engine = 'text-davinci-002'
+    response = openai.Completion.create(engine=model_engine, prompt = message, max_tokens = 50)
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=response.choices[0].text.strip())
+
 if __name__ == '__main__':
     application = ApplicationBuilder().token('6039231535:AAHdtbOOWGuuV3EioWZlYc9O0GuZldgnIo0').build()
     
@@ -45,6 +53,7 @@ if __name__ == '__main__':
     phone_handler = CommandHandler('enquiry', phone_number)
     test_handler = CommandHandler('simulation1', test_notice)
     nomoney_handler = CommandHandler('simulation2', nomoney)
+    chat_handler = MessageHandler(filters.TEXT, chat)
     unknown_handler = MessageHandler(filters.COMMAND, unknown)
     application.add_handler(start_handler)
     application.add_handler(out_handler)
@@ -52,6 +61,7 @@ if __name__ == '__main__':
     application.add_handler(phone_handler)
     application.add_handler(test_handler)
     application.add_handler(nomoney_handler)
+    application.add_handler(chat_handler)
     application.add_handler(unknown_handler)
     
     application.run_polling()
