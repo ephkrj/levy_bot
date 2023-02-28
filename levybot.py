@@ -10,6 +10,15 @@ logging.basicConfig(
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Hi " + update.message.from_user.first_name + "! I'm a bot service to update you on the issues regarding migrant domestic worker levies.")
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="You have just renewed your work permit for your existing migrant domestic worker. Please note that late payment of your foreign worker levy will result in a late payment penalty. For more information about the penalties, please see https://www.mom.gov.sg/passes-and-permits/work-permit-for-foreign-worker/foreign-worker-levy/paying-the-levy.")
+
+async def test_notice(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="10 March 2023: 7 days until your foreign worker levy is due.")
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="Amount due: $300\n Payment due date: 17 March 2023\n Your bill will be deducted from OCBC account XXX-XXX-XXX-123 via GIRO payment.")
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="To avoid payment failure and a $20 dollar penalty please ensure sufficient balance in your account. Thank you!")
+
+async def nomoney(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="18 March 2023: Your payment transaction of $300 via GIRO was unsuccessful. Please review your outstanding payment at https://www.mom.gov.sg/eservices/services/check-and-pay-levy and make payment immediately to avoid legal action.")
 
 async def outstanding(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Reveals how much levy is left outstanding for the employer."""
@@ -34,11 +43,15 @@ if __name__ == '__main__':
     out_handler = CommandHandler('payment_due', outstanding)
     hist_handler = CommandHandler('history', history)
     phone_handler = CommandHandler('enquiry', phone_number)
+    test_handler = CommandHandler('simulation1', test_notice)
+    nomoney_handler = CommandHandler('simulation2', nomoney)
     unknown_handler = MessageHandler(filters.COMMAND, unknown)
     application.add_handler(start_handler)
     application.add_handler(out_handler)
     application.add_handler(hist_handler)
     application.add_handler(phone_handler)
+    application.add_handler(test_handler)
+    application.add_handler(nomoney_handler)
     application.add_handler(unknown_handler)
     
     application.run_polling()
